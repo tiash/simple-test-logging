@@ -1,0 +1,11 @@
+[package]
+name = "simple-test-logging"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+log = "0.4.32"
+stderrlog = "0.6.0"
+
+[workspace]
+

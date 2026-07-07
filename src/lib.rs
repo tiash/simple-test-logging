@@ -22,42 +22,42 @@ static INIT: std::sync::Once = std::sync::Once::new();
 /// `debug`, `trace`, `off`). When unset or invalid, it defaults to
 /// `Error` to keep test output quiet.
 pub fn init() {
-    INIT.call_once(|| {
-        let level = std::env::var("LOG_LEVEL")
-            .ok()
-            .and_then(|s| s.parse::<log::LevelFilter>().ok())
-            .unwrap_or(log::LevelFilter::Error);
+  INIT.call_once(|| {
+    let level = std::env::var("LOG_LEVEL")
+      .ok()
+      .and_then(|s| s.parse::<log::LevelFilter>().ok())
+      .unwrap_or(log::LevelFilter::Error);
 
-        let mut inner = stderrlog::new();
-        inner
-            .verbosity(level)
-            .timestamp(stderrlog::Timestamp::Millisecond)
-            .color(stderrlog::ColorChoice::Auto)
-            .show_module_names(true);
+    let mut inner = stderrlog::new();
+    inner
+      .verbosity(level)
+      .timestamp(stderrlog::Timestamp::Millisecond)
+      .color(stderrlog::ColorChoice::Auto)
+      .show_module_names(true);
 
-        log::set_boxed_logger(Box::new(FilteringLogger { inner }))
-            .expect("Failed to initialize logger");
-        log::set_max_level(level);
-    });
+    log::set_boxed_logger(Box::new(FilteringLogger { inner }))
+      .expect("Failed to initialize logger");
+    log::set_max_level(level);
+  });
 }
 
 struct FilteringLogger {
-    inner: stderrlog::StdErrLog,
+  inner: stderrlog::StdErrLog,
 }
 
 impl log::Log for FilteringLogger {
-    fn enabled(&self, metadata: &log::Metadata) -> bool {
-        self.inner.enabled(metadata)
-    }
+  fn enabled(&self, metadata: &log::Metadata) -> bool {
+    self.inner.enabled(metadata)
+  }
 
-    fn log(&self, record: &log::Record) {
-        if record.target().starts_with("serial_test") {
-            return;
-        }
-        self.inner.log(record);
+  fn log(&self, record: &log::Record) {
+    if record.target().starts_with("serial_test") {
+      return;
     }
+    self.inner.log(record);
+  }
 
-    fn flush(&self) {
-        self.inner.flush();
-    }
+  fn flush(&self) {
+    self.inner.flush();
+  }
 }
